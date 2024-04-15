@@ -1,0 +1,237 @@
+<div class="font-['Montserrat']">
+  <div class="flex flex-row justify-center items-center gap-x-3">
+    <input
+      type="text"
+      placeholder="Enter a user name here"
+      name="user-search"
+      [(ngModel)]="inputValue"
+      class="rounded-lg p-3 bg-violet-200 text-violet-800 active:bg-violet-200 hover:bg-violet-200"
+    />
+    <button
+      (click)="inputValue ? performSearch() : null"
+      class="px-3 rounded text-[#FBFBFB] rounded-lg p-3"
+      [disabled]="!inputValue ? true : false"
+      [ngClass]="inputValue ? 'bg-violet-800' : 'bg-gray-400'"
+    >
+      Click to Search
+    </button>
+  </div>
+  <div class="flex flex-row justify-center items-center mt-4 mb-4">
+    <p class="text-violet-300">Number of repos per page &nbsp;&nbsp;</p>
+    <div class="flex flex-row items-center">
+      <input
+        id="repos-radio-1"
+        type="radio"
+        name="repos-radio"
+        class="w-4 h-4 accent-[#6741D9]"
+        value="10"
+        [checked]="reposPerPage === 10"
+        (click)="setReposPerPage(10)"
+      />
+      <label
+        for="repos-radio-1"
+        class="ms-2 text-sm font-medium text-white dark:text-white"
+        >10 &nbsp;&nbsp;</label
+      >
+      <div class="flex flex-row justify-center items-center">
+        <input
+          id="repos-radio-2"
+          type="radio"
+          name="repos-radio"
+          class="w-4 h-4 accent-[#6741D9]"
+          value="25"
+          [checked]="reposPerPage === 25"
+          (click)="setReposPerPage(25)"
+        />
+        <label
+          for="repos-radio-2"
+          class="ms-2 text-sm font-medium text-white dark:text-white"
+          >25 &nbsp;&nbsp;</label
+        >
+      </div>
+      <div class="flex flex-row justify-center items-center">
+        <input
+          id="repos-radio-3"
+          type="radio"
+          name="repos-radio"
+          class="w-4 h-4 accent-[#6741D9]"
+          value="50"
+          [checked]="reposPerPage === 50"
+          (click)="setReposPerPage(50)"
+        />
+        <label
+          for="repos-radio-3"
+          class="ms-2 text-sm font-medium text-white dark:text-white"
+          >50 &nbsp;&nbsp;</label
+        >
+      </div>
+      <div class="flex flex-row justify-center items-center">
+        <input
+          id="repos-radio-4"
+          type="radio"
+          name="repos-radio"
+          class="w-4 h-4 accent-[#6741D9]"
+          value="100"
+          [checked]="reposPerPage === 100"
+          (click)="setReposPerPage(100)"
+        />
+        <label
+          for="repos-radio-4"
+          class="ms-2 text-sm font-medium text-white dark:text-white"
+          >100</label
+        >
+      </div>
+    </div>
+  </div>
+  <ng-container *ngIf="repoList$ == null; else loadRepos">
+    <p class="text-violet-300">Search a user to view their repo list.</p>
+  </ng-container>
+  <ng-template #loadRepos>
+    <ng-container
+      *ngIf="{
+        repos: repoList$ | async,
+        error: repoListError$ | async
+      } as vm"
+    >
+      <ng-container *ngIf="user$ !== null">
+        <ng-container
+          *ngIf="{ user: user$ | async, error: userError$ | async } as userVm"
+        >
+          <ng-container *ngIf="userVm.user as user; else loading">
+            <div class="flex flex-col w-[50%] gap-y-5 m-4 mt-14 mb-14">
+              <div class="flex flex-row items-center gap-x-5">
+                <ng-container *ngIf="user.imageUrl; else noImage">
+                  <img class="w-[35%] h-[35%] rounded-full m-4" [src]="user.imageUrl" />
+                </ng-container>
+                <ng-template #noImage>
+                  <div
+                    class="flex justify-center items-center w-[30%] h-[10%] rounded-full bg-gray-700"
+                  >
+                    <p class="text-white">{{ "(No image)" }}</p>
+                  </div>
+                </ng-template>
+                <div class="flex flex-col justify-center gap-y-5">
+                  <p class="text-violet-400 text-3xl font-semibold tracking-wide">
+                    •&nbsp;{{ user.name ?? user.username }}
+                  </p>
+                  <p
+                    class="text-violet-300"
+                    [ngClass]="user.bio ? 'text-violet-300' : 'text-gray-700'"
+                  >
+                    📝&nbsp;{{ user.bio ?? "(No bio provided)" }}
+                  </p>
+                  <p
+                    class="text-violet-300"
+                    [ngClass]="
+                      user.location ? 'text-violet-300' : 'text-gray-700'
+                    "
+                  >
+                    📍&nbsp;{{ user.location ?? "(No location provided)" }}
+                  </p>
+                  <p class="text-violet-300">
+                    🐦&nbsp;{{
+                      user.twitterHandle
+                        ? "Twitter: " + user.twitterHandle
+                        : "(No Twitter handle provided)"
+                    }}
+                  </p>
+                  <ng-template #noHandles>
+                    <p
+                      class="text-violet-300"
+                      [ngClass]="
+                        user.location ? 'text-violet-300' : 'text-gray-700'
+                      "
+                    >
+                    {{ "(No handles provided)" }}
+                    </p></ng-template
+                  >
+              <p *ngIf="user.githubUrl" class="text-violet-300">
+                🧑‍💻&nbsp;{{ user.githubUrl }}
+              </p>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #loading>
+            <ng-container *ngIf="!vm.error">
+              <ngx-skeleton-loader
+                appearance="circle"
+                [theme]="{ height: '100px', width: '100px' }"
+              ></ngx-skeleton-loader>
+            </ng-container>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+      <div class="flex flex-row justify-between items-center my-10 gap-x-5">
+        <div class="flex flex-row gap-x-1" *ngIf="vm.repos">
+          <button
+            [disabled]="repoPage === 1"
+            class="px-3 rounded text-[#FBFBFB]"
+            [ngClass]="repoPage === 1 ? 'bg-violet-400' : 'bg-violet-800'"
+            (click)="searchUserReposOnPage(repoPage - 1)"
+          >
+            Prev
+          </button>
+          <p class="text-white m-2 font-semibold text-xl">{{ repoPage }}</p>
+          <button
+            [disabled]="vm.repos.length < currentReposPerPage"
+            class="px-3 rounded text-[#FBFBFB]"
+            [ngClass]="
+              vm.repos.length < currentReposPerPage
+                ? 'bg-violet-400'
+                : 'bg-violet-800'
+            "
+            (click)="searchUserReposOnPage(repoPage + 1)"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+      <ng-container *ngIf="vm.repos as repos; else loading">
+        <ng-container *ngIf="repos?.length == 0; else searchResult">
+          <p class="text-violet-200">(This user appears to have no repositories.)</p>
+        </ng-container>
+        <ng-template #searchResult>
+          <div
+            class="border border-violet-300 rounded-xl bg-violet-400/25 flex flex-col justify-between w-[80rem] h-[30%] px-5 py-3 my-3"
+            *ngFor="let repoObj of repos"
+          >
+            <ng-container *ngIf="repoObj | repository as repo">
+              <p class="text-lg text-violet-400 font-bold">
+                •&nbsp;{{ repo.name }}
+              </p>
+              <p class="text-violet-200 text-wrap">
+                {{ repo.description ?? "(No description provided)" }}
+              </p>
+              <div
+                class="flex flex-row gap-x-4"
+                *ngIf="repo.topics && repo.topics.length > 0; else noTopics"
+              >
+                <div *ngFor="let topic of repo.topics">
+                  <div
+                    class="mt-2 p-2 rounded-2xl bg-violet-600 flex justify-center items-center"
+                  >
+                    <p class="text-sm text-violet-200 font-semibold">
+                      {{ topic }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <ng-template #noTopics>
+                <p class="mt-2 text-violet-200 font-thin text-sm bg-violet-600 rounded-2xl p-1 flex justify-center items-center w-[10rem]">{{ "(No topics provided)" }}</p>
+              </ng-template>
+            </ng-container>
+          </div>
+        </ng-template>
+      </ng-container>
+      <p class="text-red-600" *ngIf="vm.error as error">
+        {{ error }}
+      </p>
+      <ng-template #loading>
+        <ng-container *ngIf="!vm.error">
+          <ngx-skeleton-loader count="5" appearance="circle" />
+        </ng-container>
+      </ng-template>
+    </ng-container>
+  </ng-template>
+</div>
